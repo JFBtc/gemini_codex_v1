@@ -1,0 +1,46 @@
+{
+    "MNQ_Session": {
+        "qty": "1",
+        "sl": "40",
+        "tp": "10",
+        "zone_mode": "Ticks",
+        "zone_val": "5",
+        "group": "4",
+        "zone_src": "L",
+        "rolling": "Vol",
+        "be_trig": "8"
+    },
+    "NQ_Session": {
+        "qty": "1",
+        "sl": "40",
+        "tp": "10",
+        "zone_mode": "Ticks",
+        "zone_val": "5",
+        "group": "4",
+        "zone_src": "L",
+        "rolling": "Vol",
+        "be_trig": "8"
+    },
+    "MES_Session": {
+        "qty": "1",
+        "sl": "8",
+        "tp": "20",
+        "zone_mode": "Ticks",
+        "zone_val": "5",
+        "group": "1",
+        "zone_src": "M",
+        "rolling": "Vol",
+        "be_trig": "10"
+    },
+    "ES_Session": {
+        "qty": "1",
+        "sl": "5",
+        "tp": "20",
+        "zone_mode": "Ticks",
+        "zone_val": "5",
+        "group": "1",
+        "zone_src": "L",
+        "rolling": "Vol",
+        "be_trig": "8"
+    }
+}

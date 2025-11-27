@@ -1,0 +1,176 @@
+{
+    "RTH_OPEN": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "RTH_CLOSE": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "GAP_RTH": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "SETTLEMENT": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "GAP_MAINT": {
+        "act": true,
+        "bias": true,
+        "mag": false,
+        "map": false
+    },
+    "GLOBEX_OPEN": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "DAY_HIGH": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "DAY_LOW": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "VWAP": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "RSI_M1": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "FVG_M1": {
+        "act": true,
+        "bias": true,
+        "mag": true,
+        "map": true
+    },
+    "PAT_M1": {
+        "act": true,
+        "bias": true,
+        "mag": false,
+        "map": false
+    },
+    "RSI_M5": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "EMA_20_M5": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "FVG_M5": {
+        "act": true,
+        "bias": true,
+        "mag": true,
+        "map": true
+    },
+    "PAT_M5": {
+        "act": false,
+        "bias": true,
+        "mag": false,
+        "map": false
+    },
+    "RSI_M15": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "FVG_M15": {
+        "act": true,
+        "bias": true,
+        "mag": true,
+        "map": true
+    },
+    "PAT_M15": {
+        "act": true,
+        "bias": true,
+        "mag": false,
+        "map": false
+    },
+    "RSI_M30": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "FVG_M30": {
+        "act": true,
+        "bias": true,
+        "mag": true,
+        "map": true
+    },
+    "RSI_H1": {
+        "act": true,
+        "bias": false,
+        "mag": false,
+        "map": false
+    },
+    "FVG_H1": {
+        "act": true,
+        "bias": true,
+        "mag": true,
+        "map": true
+    },
+    "PAT_H1": {
+        "act": true,
+        "bias": true,
+        "mag": false,
+        "map": false
+    },
+    "FVG_H4": {
+        "act": true,
+        "bias": true,
+        "mag": true,
+        "map": true
+    },
+    "PAT_H4": {
+        "act": true,
+        "bias": true,
+        "mag": false,
+        "map": false
+    },
+    "FVG_D1": {
+        "act": true,
+        "bias": true,
+        "mag": true,
+        "map": true
+    },
+    "PAT_M30": {
+        "act": true,
+        "bias": true,
+        "mag": false,
+        "map": false
+    },
+    "PAT_D1": {
+        "act": true,
+        "bias": true,
+        "mag": false,
+        "map": false
+    }
+}
