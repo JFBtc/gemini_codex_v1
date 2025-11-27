@@ -1,6 +1,7 @@
 # main.py
 import threading
 import asyncio
+import logging
 import tkinter as tk
 from engine.controller import BotController
 from ui.dashboard import ModernDashboard
@@ -10,14 +11,23 @@ from core.logger import setup_logging
 # 100ms = 10 FPS (Très fluide pour l'oeil, très léger pour le CPU)
 GUI_REFRESH_RATE_MS = 100 
 
-def start_async_loop(loop, controller):
+def start_async_loop(loop, controller, logger):
     """Fonction qui tourne dans un thread séparé pour gérer IB"""
     asyncio.set_event_loop(loop)
-    loop.run_until_complete(controller.start())
-    loop.run_forever()
+    try:
+        loop.run_until_complete(controller.start())
+        loop.run_forever()
+    except Exception:
+        logger.exception("Erreur dans le thread asynchrone")
+    finally:
+        try:
+            loop.run_until_complete(loop.shutdown_asyncgens())
+        finally:
+            loop.close()
 
 def main():
-    setup_logging() 
+    setup_logging()
+    logger = logging.getLogger(__name__)
     
     # 1. Instancier le contrôleur
     controller = BotController()
@@ -50,8 +60,8 @@ def main():
     
     # 3. Démarrer le moteur IB (Arrière-plan)
     loop = asyncio.new_event_loop()
-    t = threading.Thread(target=start_async_loop, args=(loop, controller), daemon=True)
-    t.start()
+    thread = threading.Thread(target=start_async_loop, args=(loop, controller, logger), daemon=True)
+    thread.start()
     
     # 4. Lancer l'UI
     try:
@@ -59,7 +69,11 @@ def main():
     except KeyboardInterrupt:
         pass
     finally:
-        loop.call_soon_threadsafe(loop.stop)
+        if loop.is_running() and not loop.is_closed():
+            loop.call_soon_threadsafe(loop.stop)
+        thread.join(timeout=5)
+        if thread.is_alive():
+            logger.warning("Le thread asynchrone ne s'est pas arrêté proprement avant le timeout.")
 
 if __name__ == "__main__":
     main()
