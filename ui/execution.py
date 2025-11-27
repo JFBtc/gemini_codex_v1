@@ -70,6 +70,12 @@ class ContextPanel(tk.Frame):
         self.lbl_mag_dn_txt = tk.Label(self.f_magnets, text="Support", bg="white", fg=COL_H_LIGHT, font=("Segoe UI", 7))
         self.lbl_mag_dn_txt.pack(anchor="w", padx=10, pady=(0,5))
 
+        self.lbl_mag_spread = tk.Label(self.f_magnets, text="Waiting for data...", bg="white", fg=COL_H_LIGHT, font=("Segoe UI", 8))
+        self.lbl_mag_spread.pack(fill="x", pady=(0,2))
+
+        self.lbl_dom_stats = tk.Label(self.f_magnets, text="DOM levels exported: 0", bg="white", fg=COL_H_LIGHT, font=("Segoe UI", 7))
+        self.lbl_dom_stats.pack(fill="x", pady=(0,5))
+
         # --- 3. CONTEXTE GLOBAL (Liste complète & SÉLECTION DOM) ---
         f_list_head = tk.Frame(self, bg=BG_PANEL)
         f_list_head.pack(fill="x", pady=(15,2), padx=10)
@@ -365,12 +371,19 @@ class ContextPanel(tk.Frame):
         self.lbl_mag_dn_val.config(text=f"{next_dn[0]:.2f}" if next_dn else "---")
         self.lbl_mag_dn_txt.config(text=f"Target: {next_dn[1]}" if next_dn else "")
 
+        dist_up = f"+{(next_up[0]-last_px):.2f}" if next_up else "--"
+        dist_dn = f"-{abs(next_dn[0]-last_px):.2f}" if next_dn else "--"
+        spread = f"{(next_up[0]-next_dn[0]):.2f}" if next_up and next_dn else "--"
+        self.lbl_mag_spread.config(text=f"ΔUp: {dist_up} | ΔDown: {dist_dn} | Spread: {spread}")
+
         self.tree_struct.delete(*self.tree_struct.get_children())
         all_map_rows.sort(key=lambda x: x["sort_dist"])
         for r in all_map_rows:
             self.tree_struct.insert("", "end", values=(r["dom"], r["desc"], r["lvl"], f"{r['dist']:.2f}"), tags=r["tags"])
 
         self.controller.set_dom_levels(self.sym, dom_export_list)
+
+        self.lbl_dom_stats.config(text=f"DOM levels exported: {len(dom_export_list)}")
 
 
 class ExecutionView(tk.Frame):
