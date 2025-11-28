@@ -21,6 +21,7 @@ def start_async_loop(loop, controller, logger):
         logger.exception("Erreur dans le thread asynchrone")
     finally:
         try:
+            loop.stop()
             loop.run_until_complete(loop.shutdown_asyncgens())
         finally:
             loop.close()
@@ -61,7 +62,11 @@ def main():
     # 3. Démarrer le moteur IB (Arrière-plan)
     loop = asyncio.new_event_loop()
     thread = threading.Thread(target=start_async_loop, args=(loop, controller, logger), daemon=True)
-    thread.start()
+    try:
+        thread.start()
+    except Exception:
+        logger.exception("Échec du démarrage du thread asynchrone")
+        raise
     
     # 4. Lancer l'UI
     try:
@@ -74,6 +79,11 @@ def main():
         thread.join(timeout=5)
         if thread.is_alive():
             logger.warning("Le thread asynchrone ne s'est pas arrêté proprement avant le timeout.")
+        elif not loop.is_closed():
+            try:
+                loop.run_until_complete(loop.shutdown_asyncgens())
+            finally:
+                loop.close()
 
 if __name__ == "__main__":
     main()
