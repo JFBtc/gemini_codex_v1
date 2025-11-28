@@ -114,6 +114,7 @@ class ModernDashboard(ttk.Notebook):
         self.controller = controller
         self.charts_window = None
         self.refresh_guard = RefreshGuard()
+        self.logger = logging.getLogger(__name__)
         self._exec_tab_base = " 🚀 EXÉCUTION "
 
         # --- 1. NOUVEAU COCKPIT (PAR DÉFAUT) ---
@@ -143,6 +144,23 @@ class ModernDashboard(ttk.Notebook):
         if self.charts_window is None or not tk.Toplevel.winfo_exists(self.charts_window):
             self.charts_window = ChartsWindow(self.controller)
 
+    @staticmethod
+    def _safe_refresh(widget_name, refresh_callable, logger, log_exception=True):
+        """
+        Run a widget refresh and return True/False depending on success.
+
+        This protects the UI loop from crashing when a widget raises during
+        refresh, while optionally logging the failure for diagnostics.
+        """
+
+        try:
+            refresh_callable()
+            return True
+        except Exception:
+            if log_exception:
+                logger.exception("Echec du rafraîchissement du widget %s", widget_name)
+            return False
+
     def _update_exec_tab_status(self):
         self.tab(self.tab_exec, text=f"{self._exec_tab_base}{self.refresh_guard.status_suffix}")
 
@@ -151,20 +169,26 @@ class ModernDashboard(ttk.Notebook):
         # mais on refresh tout pour garantir la fluidité des données en arrière-plan)
 
         # On refresh d'abord l'onglet Exécution s'il est visible (ou tout le temps pour les alertes)
-        try:
-            self.tab_exec.refresh()
+        is_exec_ok = self._safe_refresh(
+            "ExecutionView",
+            self.tab_exec.refresh,
+            self.logger,
+            log_exception=False,
+        )
+
+        if is_exec_ok:
             self.tab(self.tab_exec, state="normal")
             self.refresh_guard.record_success()
-        except Exception:
+        else:
             self.tab(self.tab_exec, state="disabled")
             self.refresh_guard.record_failure("ExecutionView")
-        finally:
-            self._update_exec_tab_status()
 
-        self.tab_wall.refresh()
-        self.tab_nq.refresh()
-        self.tab_es.refresh()
+        self._update_exec_tab_status()
+
+        self._safe_refresh("WallView", self.tab_wall.refresh, self.logger)
+        self._safe_refresh("FocusView-NQ", self.tab_nq.refresh, self.logger)
+        self._safe_refresh("FocusView-ES", self.tab_es.refresh, self.logger)
         # Le Labo a son propre auto-refresh interne, pas besoin de l'appeler ici
-        
+
         if self.charts_window and tk.Toplevel.winfo_exists(self.charts_window):
-            self.charts_window.refresh()
+            self._safe_refresh("ChartsWindow", self.charts_window.refresh, self.logger)

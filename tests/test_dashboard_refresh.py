@@ -1,7 +1,8 @@
 import logging
+import logging.handlers
 import unittest
 
-from ui.dashboard import RefreshGuard
+from ui.dashboard import ModernDashboard, RefreshGuard
 
 
 class RefreshGuardTests(unittest.TestCase):
@@ -32,6 +33,38 @@ class RefreshGuardTests(unittest.TestCase):
         self.assertEqual(guard.failure_count, 0)
         self.assertEqual(suffix, "")
         self.assertEqual(guard.status_suffix, "")
+
+    def test_safe_refresh_logs_failure(self):
+        calls = []
+
+        def failing_refresh():
+            calls.append("called")
+            raise RuntimeError("Kaboom")
+
+        logger = logging.getLogger("ui.dashboard.test")
+        with self.assertLogs(logger, level="ERROR") as cm:
+            result = ModernDashboard._safe_refresh("Widget", failing_refresh, logger)
+
+        self.assertFalse(result)
+        self.assertEqual(calls, ["called"])
+        self.assertIn("Widget", "\n".join(cm.output))
+
+    def test_safe_refresh_can_skip_logging(self):
+        def failing_refresh():
+            raise RuntimeError("Kaboom")
+
+        logger = logging.getLogger("ui.dashboard.test.skip")
+        handler = logging.handlers.BufferingHandler(capacity=10)
+        logger.addHandler(handler)
+        try:
+            result = ModernDashboard._safe_refresh(
+                "Widget", failing_refresh, logger, log_exception=False
+            )
+        finally:
+            logger.removeHandler(handler)
+
+        self.assertFalse(result)
+        self.assertEqual(handler.buffer, [])
 
 
 if __name__ == "__main__":
