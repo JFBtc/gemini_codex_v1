@@ -1,4 +1,5 @@
 # ui/dashboard.py
+import logging
 import tkinter as tk
 from tkinter import ttk
 from ui.book import MultiHorizonWidget, COLOR_BG_APP
@@ -72,6 +73,27 @@ class ChartsWindow(tk.Toplevel):
     def refresh(self):
         for c in self.charts: c.update_chart()
 
+
+class RefreshGuard:
+    """Utility to track refresh failures and expose a status suffix."""
+
+    def __init__(self):
+        self.failure_count = 0
+
+    def record_success(self):
+        if self.failure_count:
+            self.failure_count = 0
+        return self.status_suffix
+
+    def record_failure(self, widget_name):
+        self.failure_count += 1
+        logging.exception("Echec du rafraîchissement du widget %s", widget_name)
+        return self.status_suffix
+
+    @property
+    def status_suffix(self):
+        return "" if self.failure_count == 0 else f" ⚠️ ({self.failure_count})"
+
 class FocusView(tk.Frame):
     def __init__(self, parent, controller, pair_index):
         super().__init__(parent, bg=COLOR_BG_APP)
@@ -91,10 +113,12 @@ class ModernDashboard(ttk.Notebook):
         super().__init__(parent)
         self.controller = controller
         self.charts_window = None
-        
+        self.refresh_guard = RefreshGuard()
+        self._exec_tab_base = " 🚀 EXÉCUTION "
+
         # --- 1. NOUVEAU COCKPIT (PAR DÉFAUT) ---
         self.tab_exec = ExecutionView(self, controller)
-        self.add(self.tab_exec, text=" 🚀 EXÉCUTION ")
+        self.add(self.tab_exec, text=self._exec_tab_base)
 
         # --- 2. ANCIENS ONGLETS ---
         self.tab_wall = WallView(self, controller)
@@ -119,13 +143,23 @@ class ModernDashboard(ttk.Notebook):
         if self.charts_window is None or not tk.Toplevel.winfo_exists(self.charts_window):
             self.charts_window = ChartsWindow(self.controller)
 
+    def _update_exec_tab_status(self):
+        self.tab(self.tab_exec, text=f"{self._exec_tab_base}{self.refresh_guard.status_suffix}")
+
     def refresh(self):
-        # Refresh priority (Onglet actif seulement serait une optimisation, 
+        # Refresh priority (Onglet actif seulement serait une optimisation,
         # mais on refresh tout pour garantir la fluidité des données en arrière-plan)
-        
+
         # On refresh d'abord l'onglet Exécution s'il est visible (ou tout le temps pour les alertes)
-        try: self.tab_exec.refresh()
-        except: pass
+        try:
+            self.tab_exec.refresh()
+            self.tab(self.tab_exec, state="normal")
+            self.refresh_guard.record_success()
+        except Exception:
+            self.tab(self.tab_exec, state="disabled")
+            self.refresh_guard.record_failure("ExecutionView")
+        finally:
+            self._update_exec_tab_status()
 
         self.tab_wall.refresh()
         self.tab_nq.refresh()
